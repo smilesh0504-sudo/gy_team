@@ -1,3 +1,4 @@
+
 export type Page = 'main' | 'signup' | 'explore' | 'myinfo' | 'upload' | 'result' | 'add' | 'history';
 
 export interface User {
@@ -20,6 +21,7 @@ export interface Persona {
   color: string;
   description: string;
   comment: string;
+  tips: string[];
 }
 
 export type AnalysisResult = {

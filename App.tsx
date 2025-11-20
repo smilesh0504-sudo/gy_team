@@ -17,6 +17,7 @@ import AppLayout from './components/AppLayout';
 import type { Tab } from './components/AppLayout';
 import { getHistory, saveToHistory, deleteFromHistory } from './utils/versionHistory';
 import { login, signUp, logout, getCurrentUser } from './utils/auth';
+import AlertModal from './components/AlertModal';
 
 type AuthPage = 'main' | 'login' | 'signup';
 type AnalysisPage = 'upload' | 'result' | 'add';
@@ -27,6 +28,14 @@ const App: React.FC = () => {
     const [authPage, setAuthPage] = useState<AuthPage>('main');
     const [authLoading, setAuthLoading] = useState(false);
     
+    // Alert & Confirm State (Replaces native alert/confirm)
+    const [alertState, setAlertState] = useState({ 
+        isOpen: false, 
+        message: '', 
+        type: 'alert' as 'alert' | 'confirm',
+        onConfirm: undefined as (() => void) | undefined 
+    });
+
     // App State (for authenticated users)
     const [activeTab, setActiveTab] = useState<Tab>('analysis');
     const [analysisPage, setAnalysisPage] = useState<AnalysisPage>('upload');
@@ -39,14 +48,25 @@ const App: React.FC = () => {
     const [viewingVersion, setViewingVersion] = useState<AnalysisVersion | null>(null);
 
     useEffect(() => {
-        setCurrentUser(getCurrentUser());
+        const savedUser = getCurrentUser();
+        if (savedUser) {
+            setCurrentUser(savedUser);
+            // 사용자가 있으면 해당 사용자의 기록을 불러옴
+            setVersions(getHistory(savedUser.id));
+        }
     }, []);
 
-    useEffect(() => {
-        if (currentUser) {
-            setVersions(getHistory());
-        }
-    }, [currentUser]);
+    const showAlert = (message: string) => {
+        setAlertState({ isOpen: true, message, type: 'alert', onConfirm: undefined });
+    };
+
+    const showConfirm = (message: string, onConfirm: () => void) => {
+        setAlertState({ isOpen: true, message, type: 'confirm', onConfirm });
+    };
+
+    const closeAlert = () => {
+        setAlertState(prev => ({ ...prev, isOpen: false }));
+    };
 
     const resetAnalysisState = useCallback(() => {
         setData([]);
@@ -61,15 +81,18 @@ const App: React.FC = () => {
         setAuthLoading(true);
         try {
             const result = await login(nickname, id);
+            
+            setAuthLoading(false);
+
             if (result.success && result.user) {
                 setCurrentUser(result.user);
+                setVersions(getHistory(result.user.id));
             } else {
-                alert(result.message);
+                showAlert(result.message);
             }
         } catch (error) {
-            alert('로그인 중 예상치 못한 오류가 발생했습니다.');
-        } finally {
             setAuthLoading(false);
+            showAlert('로그인 중 예상치 못한 오류가 발생했습니다.');
         }
     };
 
@@ -77,14 +100,16 @@ const App: React.FC = () => {
         setAuthLoading(true);
         try {
             const result = await signUp(nickname, id);
-            alert(result.message);
+            setAuthLoading(false);
+
+            showAlert(result.message);
+            
             if (result.success) {
                 setAuthPage('login');
             }
         } catch (error) {
-             alert('회원가입 중 예상치 못한 오류가 발생했습니다.');
-        } finally {
-            setAuthLoading(false);
+             setAuthLoading(false);
+             showAlert('회원가입 중 예상치 못한 오류가 발생했습니다.');
         }
     };
     
@@ -94,16 +119,14 @@ const App: React.FC = () => {
         resetAnalysisState();
         setAuthPage('main');
         setActiveTab('analysis');
+        setVersions([]); // Clear versions on logout
     };
 
     const handleTabChange = (tab: Tab) => {
         setActiveTab(tab);
-        // If switching away from analysis, reset its state if it's not in the middle of viewing history
-        if (tab !== 'analysis' && !viewingVersion) {
-            resetAnalysisState();
-        }
+        // 탭을 변경해도 현재 분석 중인 상태(state)는 유지합니다.
         if (tab === 'analysis' && viewingVersion) {
-            setViewingVersion(null); // Clear history view when explicitly clicking analysis tab
+            setViewingVersion(null); // 기록 보기 상태였다면 분석 탭 클릭 시 해제
         }
     };
 
@@ -164,7 +187,7 @@ const App: React.FC = () => {
                 },
                 error: (err) => {
                     console.error("CSV/TXT parsing error:", err);
-                    alert('파일을 처리하는 중 오류가 발생했습니다.');
+                    showAlert('파일을 처리하는 중 오류가 발생했습니다.');
                     setIsLoading(false);
                 }
             });
@@ -184,18 +207,18 @@ const App: React.FC = () => {
                     processAndSetData(parsedData);
                 } catch (err) {
                     console.error("Excel parsing error:", err);
-                    alert('Excel 파일을 처리하는 중 오류가 발생했습니다.');
+                    showAlert('Excel 파일을 처리하는 중 오류가 발생했습니다.');
                 } finally {
                     setIsLoading(false);
                 }
             };
             reader.onerror = () => {
-                 alert('파일을 읽는 중 오류가 발생했습니다.');
+                 showAlert('파일을 읽는 중 오류가 발생했습니다.');
                  setIsLoading(false);
             };
             reader.readAsArrayBuffer(file);
         } else {
-            alert(`지원하지 않는 파일 형식입니다: .${fileExtension}\nCSV, Excel, TXT 파일을 업로드해주세요.`);
+            showAlert(`지원하지 않는 파일 형식입니다: .${fileExtension}\nCSV, Excel, TXT 파일을 업로드해주세요.`);
             setIsLoading(false);
         }
     };
@@ -251,7 +274,7 @@ const App: React.FC = () => {
     };
 
     const handleSaveAndFinish = () => {
-        if (!data || data.length === 0) {
+        if (!data || data.length === 0 || !currentUser) {
             resetAnalysisState();
             return;
         }
@@ -262,9 +285,15 @@ const App: React.FC = () => {
             persona,
             analysis,
         };
-        saveToHistory(newVersion);
-        setVersions(getHistory());
+        saveToHistory(currentUser.id, newVersion);
+        setVersions(getHistory(currentUser.id));
         resetAnalysisState();
+    };
+
+    const handleResetWithoutSave = () => {
+        showConfirm('현재 분석 내용을 저장하지 않고 초기화하시겠습니까?', () => {
+             resetAnalysisState();
+        });
     };
 
     const handleViewVersion = (id: string) => {
@@ -277,8 +306,11 @@ const App: React.FC = () => {
     };
     
     const handleDeleteVersion = (id: string) => {
-        deleteFromHistory(id);
-        setVersions(getHistory());
+        if (!currentUser) return;
+        showConfirm('이 기록을 정말 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.', () => {
+            deleteFromHistory(currentUser.id, id);
+            setVersions(getHistory(currentUser.id)); 
+        });
     };
 
     const renderAuthComponent = () => {
@@ -326,6 +358,7 @@ const App: React.FC = () => {
                                 isHistoryView: false as const,
                                 onAddData: () => setAnalysisPage('add'),
                                 onFinish: handleSaveAndFinish,
+                                onResetWithoutSave: handleResetWithoutSave,
                               };
                         return <ResultPage {...resultProps} />;
                     case 'add':
@@ -352,14 +385,25 @@ const App: React.FC = () => {
         }
     };
 
-    if (!currentUser) {
-        return <div className="min-h-screen bg-gray-50 font-sans">{renderAuthComponent()}</div>;
-    }
-
     return (
-        <AppLayout activeTab={activeTab} onTabChange={handleTabChange}>
-            {renderAppComponent()}
-        </AppLayout>
+        <>
+            {!currentUser ? (
+                <div className="min-h-screen bg-gray-50 font-sans">{renderAuthComponent()}</div>
+            ) : (
+                <AppLayout activeTab={activeTab} onTabChange={handleTabChange}>
+                    {renderAppComponent()}
+                </AppLayout>
+            )}
+            
+            {/* Global Custom Alert/Confirm Modal */}
+            <AlertModal 
+                isOpen={alertState.isOpen} 
+                message={alertState.message} 
+                onClose={closeAlert} 
+                type={alertState.type}
+                onConfirm={alertState.onConfirm}
+            />
+        </>
     );
 };
 
