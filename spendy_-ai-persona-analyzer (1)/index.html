@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Spendy Icon: Wide Mask + Rising Graph on Blue Gradient -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjM2I4MmY2Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMWQ0ZWQ4Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMjgiIGZpbGw9InVybCgjZ3JhZCkiLz48IS0tIEdyYXBoIEJhcnMgLS0+PHJlY3QgeD0iMTQ2IiB5PSIxNDAiIHdpZHRoPSI1MCIgaGVpZ2h0PSIxNTAiIHJ4PSI4IiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC41Ii8+PHJlY3QgeD0iMjMwIiB5PSI5MCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjIwMCIgcng9IjgiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjciLz48cmVjdCB4PSIzMTQiIHk9IjQwIiB3aWR0aD0iNTAiIGhlaWdodD0iMjUwIiByeD0iOCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuOSIvPjwhLS0gV2lkZSBNYXNrIC0tPjxwYXRoIGQ9Ik0yNTYgMzIwQzE1MCAzMjAgNzAgMzYwIDUwIDQwMEM0MCA0MjAgNjAgNDUwIDgwIDQ2MEMxMzAgNDgwIDIwMCA0NDAgMjU2IDQ0MEMzMTIgNDQwIDM4MiA0ODAgNDMyIDQ2MEM0NTIgNDUwIDQ3MiA0MjAgNDYyIDQwMEM0NDIgMzYwIDM2MiAzMjAgMjU2IDMyMFpNMTY2IDM3MEMxNDYgMzcwIDEzMCAzODQgMTMwIDQwMEMxMzAgNDE2IDE0NiA0MzAgMTY2IDQzMEMxODYgNDMwIDIwMiA0MTYgMjAyIDQwMEMyMDIgMzg0IDE4NiAzNzAgMTY2IDM3MFpNMzQ2IDM3MEMzMjYgMzcwIDMxMCAzODQgMzEwIDQwMEMzMTAgNDE2IDMyNiA0MzAgMzQ2IDQzMEMzNjYgNDMwIDM4MiA0MTYgMzgyIDQwMEMzODIgMzg0IDM2NiAzNzAgMzQ2IDM3MFoiIGZpbGw9IndoaXRlIi8+PC9zdmc+" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spendy: AI Persona Analyzer</title>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3182F6" />
+    <!-- Google Fonts: Noto Sans KR (Better Readability) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Noto Sans KR"', 'sans-serif'],
+            },
+            colors: {
+              primary: '#3182F6',
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.552.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "xlsx": "https://aistudiocdn.com/xlsx@^0.18.5",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0",
+    "papaparse": "https://aistudiocdn.com/papaparse@^5.5.3"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
